@@ -56,8 +56,10 @@
             align-items: center;
             justify-content: center;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
+            font-size: 0.85rem; /* Slightly smaller font to fit more data */
             color: #f8fafc;
+            overflow: hidden; /* Prevent overflow */
+            white-space: nowrap;
         }
 
         .grid-cell:hover {
@@ -132,6 +134,9 @@
 
     <canvas id="effects-canvas"></canvas>
     <canvas id="confetti"></canvas>
+    
+    <!-- Preloaded Audio Assets -->
+    <audio id="end-sfx" src="https://github.com/Cleo876/LOGISTICS-COMMAND/raw/refs/heads/main/space-sfx.mp3" preload="auto"></audio>
 
     <!-- Header -->
     <header class="bg-slate-900/90 backdrop-blur border-b border-slate-700 p-4 flex justify-between items-center z-50 shadow-lg">
@@ -380,6 +385,9 @@
         successSfx.volume = 0.6;
         const errorSfx = new Audio('https://github.com/Cleo876/Quick-Bites/raw/refs/heads/main/incorrect-sfx.wav');
         errorSfx.volume = 0.6; 
+        
+        // End Game Audio (Initialized by HTML)
+        // This ensures it is preloaded and ready for instant playback
 
         function playSuccess() {
             successSfx.currentTime = 0;
@@ -405,9 +413,9 @@
                     <p class="mt-3 text-yellow-300 font-bold">Task: Calculate value of Fuel Pods (Qty × Price).</p>
                 `,
                 setup: {
-                    "A1": "ITEM", "B1": "QTY", "C1": "PRICE",
-                    "A2": "Fuel Pod", "B2": 50, "C2": 20,
-                    "A3": "Rations", "B3": 100, "C3": 5,
+                    "A1": "ITEM", "B1": "QTY", "C1": "PRICE", "D1": "STATUS", "E1": "BIN #",
+                    "A2": "Fuel Pod", "B2": 50, "C2": 20, "D2": "Secure", "E2": "A-101",
+                    "A3": "Rations", "B3": 100, "C3": 5, "D3": "Ok", "E3": "B-202",
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
@@ -420,28 +428,28 @@
                 title: "Expense Report",
                 sheetName: "ENGINE_REPAIRS.xlsx",
                 desc: `
-                    <p>The Commander needs the <strong>Total Cost</strong> of all repairs from the battle expidition.</p>
-                    <p class="mt-3 text-yellow-300 font-bold">Task: Use SUM to add all costs in Column B.</p>
+                    <p>The Commander needs the <strong>Total Cost</strong> of all repairs from the battle expedition.</p>
+                    <p class="mt-3 text-yellow-300 font-bold">Task: Calculate the total cost of the repair items listed.</p>
                 `,
                 setup: {
-                    "A1": "PART", "B1": "COST",
-                    "A2": "Valve", "B2": 450,
-                    "A3": "Seal", "B3": 120,
-                    "A4": "Bolt", "B4": 30,
-                    "A5": "Labor", "B5": 200
+                    "A1": "PART", "B1": "COST", "C1": "TECH ID", "D1": "DATE",
+                    "A2": "Valve", "B2": 450, "C2": "X-99", "D2": "12/05",
+                    "A3": "Seal", "B3": 120, "C2": "X-99", "D3": "12/06",
+                    "A4": "Bolt", "B4": 30, "C2": "Y-40", "D4": "12/06",
+                    "A5": "Labor", "B5": 200, "C2": "Y-40", "D5": "12/07"
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
                     return clean.startsWith("=SUM(") && val === 800;
                 },
-                hint: "Use =SUM(start:end) to add the range."
+                hint: "Use =SUM(start:end) on the cost data."
             },
             // Level 3: Subtraction
             {
                 title: "Profit Analysis",
                 sheetName: "TRADING_POST.xlsx",
                 desc: `
-                    <p>We need to determine our Net Profit from the Epidition, this will be how we cover the cost of the repairs and see how much we made from the expidition.</p>
+                    <p>We need to determine our Net Profit from the Expedition, this will be how we cover the cost of the repairs and see how much we made from the expedition.</p>
                     <ul class="list-disc pl-4 mt-2 text-slate-400 text-xs space-y-1">
                         <li>B2: Revenue</li>
                         <li>B3: Expenses</li>
@@ -449,10 +457,10 @@
                     <p class="mt-3 text-yellow-300 font-bold">Task: Calculate Profit (Revenue - Expenses).</p>
                 `,
                 setup: {
-                    "A1": "METRIC", "B1": "VALUE",
-                    "A2": "Revenue", "B2": 5000,
-                    "A3": "Expenses", "B3": 3200,
-                    "A4": "Profit", "B4": null
+                    "A1": "METRIC", "B1": "VALUE", "C1": "NOTES",
+                    "A2": "Revenue", "B2": 5000, "C2": "Credits",
+                    "A3": "Expenses", "B3": 3200, "C3": "Credits",
+                    "A4": "Profit", "B4": null, "C4": "Credits"
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
@@ -466,15 +474,15 @@
                 sheetName: "PILOT_SCORES.xlsx",
                 desc: `
                     <p>Identify the <strong>highest score</strong> recorded for each of these pilots to see who is the <strong>top performer</strong> currently.</p>
-                    <p class="mt-3 text-yellow-300 font-bold">Task: Use a function to find the MAX score in Col C.</p>
+                    <p class="mt-3 text-yellow-300 font-bold">Task: Use a function to find the highest pilot score.</p>
                 `,
                 setup: {
-                    "A1": "PILOT", "C1": "SCORE",
-                    "A2": "Viper", "C2": 88,
-                    "A3": "Starbuck", "C3": 95,
-                    "A4": "Apollo", "C4": 92,
-                    "A5": "Boomer", "C5": 85,
-                    "A6": "Helo", "C6": 70
+                    "A1": "PILOT", "B1": "RANK", "C1": "SCORE", "D1": "EXP",
+                    "A2": "Viper", "B2": "Lt.", "C2": 88, "D2": "2yr",
+                    "A3": "Starbuck", "B3": "Cpt.", "C3": 95, "D3": "5yr",
+                    "A4": "Apollo", "B4": "Cpt.", "C4": 92, "D4": "4yr",
+                    "A5": "Boomer", "B5": "Lt.", "C5": 85, "D5": "3yr",
+                    "A6": "Helo", "B6": "Sgt.", "C6": 70, "D6": "1yr"
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
@@ -488,19 +496,19 @@
                 sheetName: "FLEET_FUEL.xlsx",
                 desc: `
                     <p>We need the <strong>Average</strong> fuel level of our 3 main ships.</p>
-                    <p class="mt-3 text-yellow-300 font-bold">Task: Calculate the AVERAGE of the fleet's fuel (B2:B4).</p>
+                    <p class="mt-3 text-yellow-300 font-bold">Task: Calculate the average fuel percentage of the ships listed.</p>
                 `,
                 setup: {
-                    "A1": "SHIP", "B1": "FUEL %",
-                    "A2": "Alpha", "B2": 80,
-                    "A3": "Beta", "B3": 60,
-                    "A4": "Gamma", "B4": 100
+                    "A1": "SHIP", "B1": "FUEL %", "C1": "CLASS", "D1": "DOCK",
+                    "A2": "Alpha", "B2": 80, "C2": "Fighter", "D2": "D-1",
+                    "A3": "Beta", "B3": 60, "C2": "Bomber", "D2": "D-2",
+                    "A4": "Gamma", "B4": 100, "C2": "Scout", "D2": "D-3"
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
                     return clean.startsWith("=AVERAGE(") && val === 80;
                 },
-                hint: "Use =AVERAGE(B2:B4)"
+                hint: "Use =AVERAGE(start:end) on the fuel data."
             },
             // Level 6: MIN (System Cooling)
             {
@@ -508,15 +516,15 @@
                 sheetName: "REACTOR_CORE.xlsx",
                 desc: `
                     <p>Warning: One sector is dropping to dangerous temperatures. We need to find the <strong>lowest</strong> temp reading to direct heat.</p>
-                    <p class="mt-3 text-yellow-300 font-bold">Task: Use a function to find the MIN temperature in Column B (B2:B6).</p>
+                    <p class="mt-3 text-yellow-300 font-bold">Task: Identify the minimum temperature in the sector readings.</p>
                 `,
                 setup: {
-                    "A1": "SECTOR", "B1": "TEMP (K)",
-                    "A2": "North", "B2": 350,
-                    "A3": "East", "B3": 210,
-                    "A4": "South", "B4": 150,
-                    "A5": "West", "B5": 310,
-                    "A6": "Core", "B6": 400
+                    "A1": "SECTOR", "B1": "TEMP (K)", "C1": "TREND",
+                    "A2": "North", "B2": 350, "C2": "Stable",
+                    "A3": "East", "B3": 210, "C3": "Falling",
+                    "A4": "South", "B4": 150, "C4": "Crit-Low",
+                    "A5": "West", "B5": 310, "C5": "Stable",
+                    "A6": "Core", "B6": 400, "C6": "Rising"
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
@@ -529,14 +537,14 @@
                 title: "Hyperdrive Output",
                 sheetName: "POWER_GRID.xlsx",
                 desc: `
-                    <p>We are ready to jump to lightspeed, but the Hyperdrive needs a <strong>Combined Power Factor</strong> from the Main, Aux, and Boost couplings.</p>
-                    <p class="mt-3 text-yellow-300 font-bold">Task: Determine the total amplified power output of the three couplings.</p>
+                    <p>To initiate the jump, the Hyperdrive needs the <strong>combined product</strong> of the Main, Aux, and Boost power couplings.</p>
+                    <p class="mt-3 text-yellow-300 font-bold">Task: Determine the total power factor by multiplying the three coupling outputs.</p>
                 `,
                 setup: {
-                    "A1": "PART", "C1": "POWER",
-                    "A2": "Main", "C2": 5,
-                    "A3": "Aux", "C3": 2,
-                    "A4": "Boost", "C4": 10
+                    "A1": "PART", "B1": "STATUS", "C1": "POWER", "D1": "FREQ",
+                    "A2": "Main", "B2": "Online", "C2": 5, "D2": "60Hz",
+                    "A3": "Aux", "B3": "Online", "C3": 2, "D3": "60Hz",
+                    "A4": "Boost", "B4": "Ready", "C4": 10, "D4": "120Hz"
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
@@ -549,13 +557,13 @@
                 title: "Quarterly Yield",
                 sheetName: "MINING_OPS.xlsx",
                 desc: `
-                    <p>Mining Command is requesting a performance review for <strong>Sector 7</strong>. We have yield data for Q1, Q2, and Q3.</p>
-                    <p class="mt-3 text-yellow-300 font-bold">Task: Report the <strong>Total Yield</strong> generated by Sector 7 across all three quarters.</p>
+                    <p>Mining Command needs a report on <strong>Sector 7</strong>. We need to know the <strong>Total Yield</strong> generated across the first three quarters.</p>
+                    <p class="mt-3 text-yellow-300 font-bold">Task: Calculate the sum of yields for Sector 7.</p>
                 `,
                 setup: {
-                    "A1": "SECTOR", "B1": "Q1", "C1": "Q2", "D1": "Q3", 
-                    "A2": "Sec-7", "B2": 150, "C2": 200, "D2": 150,
-                    "A3": "Sec-8", "B3": 50,  "C3": 60,  "D3": 40
+                    "A1": "SECTOR", "B1": "Q1", "C1": "Q2", "D1": "Q3", "E1": "TYPE",
+                    "A2": "Sec-7", "B2": 150, "C2": 200, "D2": 150, "E2": "Iron",
+                    "A3": "Sec-8", "B3": 50,  "C3": 60,  "D3": 40, "E3": "Gold"
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
@@ -572,9 +580,9 @@
                     <p class="mt-3 text-yellow-300 font-bold">Task: Calculate the efficiency rating for Panel X-1.</p>
                 `,
                 setup: {
-                    "A1": "PANEL", "B1": "OUT", "C1": "IN",
-                    "A2": "X-1", "B2": 800, "C2": 1000,
-                    "A3": "X-2", "B3": 500, "C3": 1000
+                    "A1": "PANEL", "B1": "OUT", "C1": "IN", "D1": "HEALTH",
+                    "A2": "X-1", "B2": 800, "C2": 1000, "D2": "98%",
+                    "A3": "X-2", "B3": 500, "C3": 1000, "D3": "45%"
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
@@ -588,13 +596,13 @@
                 sheetName: "SHIELD_ARRAY.xlsx",
                 desc: `
                     <p><strong>CRITICAL ALERT:</strong> The Shield Array is fluctuating! We need to balance the grid using the <strong>Average</strong> energy level of all active emitters.</p>
-                    <p class="mt-3 text-yellow-300 font-bold">Task: Calculate the average stability for the entire block of emitters.</p>
+                    <p class="mt-3 text-yellow-300 font-bold">Task: Calculate the average energy of the emitter block (Alpha, Beta, and Gamma).</p>
                 `,
                 setup: {
-                    "A1": "ZONE", "B1": "L", "C1": "R",
-                    "A2": "Top", "B2": 80, "C2": 90,
-                    "A3": "Mid", "B3": 85, "C3": 95,
-                    "A4": "Bot", "B4": 75, "C4": 85
+                    "A1": "ZONE", "B1": "L", "C1": "R", "D1": "MOD",
+                    "A2": "Top", "B2": 80, "C2": 90, "D2": "Alpha",
+                    "A3": "Mid", "B3": 85, "C3": 95, "D3": "Beta",
+                    "A4": "Bot", "B4": 75, "C4": 85, "D4": "Gamma"
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
@@ -953,6 +961,13 @@
                  loadLevel(currentLevel + 1);
              } else {
                  // END GAME SEQUENCE
+                 // 1. TRIGGER AUDIO IMMEDIATELY BEFORE ANIMATION
+                 const endAudio = document.getElementById('end-sfx');
+                 if(endAudio) {
+                     endAudio.currentTime = 0;
+                     endAudio.play().catch(e => console.warn("End audio blocked:", e));
+                 }
+                 // 2. Start Animation
                  playGalaxyAnimation();
              }
         }
