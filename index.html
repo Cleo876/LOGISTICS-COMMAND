@@ -419,7 +419,9 @@
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
-                    return (clean.includes("B2*C2") || clean.includes("C2*B2") || clean.includes("PRODUCT(B2,C2)")) && val === 1000;
+                    // Validation: Check math AND check specific cell refs (B2, C2) are used
+                    const validFormula = (clean.includes("B2*C2") || clean.includes("C2*B2") || clean.includes("PRODUCT(B2,C2)"));
+                    return validFormula && val === 1000;
                 },
                 hint: "Multiply the Quantity cell by the Price cell using the asterisk (*)."
             },
@@ -440,7 +442,9 @@
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
-                    return clean.startsWith("=SUM(") && val === 800;
+                    // Strict check: Must use SUM and the range B2:B5
+                    const validRange = clean.includes("B2:B5");
+                    return clean.startsWith("=SUM(") && validRange && val === 800;
                 },
                 hint: "Use =SUM(start:end) on the cost data."
             },
@@ -474,7 +478,7 @@
                 sheetName: "PILOT_SCORES.xlsx",
                 desc: `
                     <p>Identify the <strong>highest score</strong> recorded for each of these pilots to see who is the <strong>top performer</strong> currently.</p>
-                    <p class="mt-3 text-yellow-300 font-bold">Task: Use a function to find the highest pilot score.</p>
+                    <p class="mt-3 text-yellow-300 font-bold">Task: Use a function to identify the highest pilot score recorded.</p>
                 `,
                 setup: {
                     "A1": "PILOT", "B1": "RANK", "C1": "SCORE", "D1": "EXP",
@@ -486,7 +490,9 @@
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
-                    return clean.startsWith("=MAX(") && val === 95;
+                    // Strict check: MAX on C2:C6
+                    const validRange = clean.includes("C2:C6");
+                    return clean.startsWith("=MAX(") && validRange && val === 95;
                 },
                 hint: "Use the =MAX() function on the score range."
             },
@@ -496,7 +502,7 @@
                 sheetName: "FLEET_FUEL.xlsx",
                 desc: `
                     <p>We need the <strong>Average</strong> fuel level of our 3 main ships.</p>
-                    <p class="mt-3 text-yellow-300 font-bold">Task: Calculate the average fuel percentage of the ships listed.</p>
+                    <p class="mt-3 text-yellow-300 font-bold">Task: Calculate the average fuel percentage across the fleet.</p>
                 `,
                 setup: {
                     "A1": "SHIP", "B1": "FUEL %", "C1": "CLASS", "D1": "DOCK",
@@ -506,7 +512,9 @@
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
-                    return clean.startsWith("=AVERAGE(") && val === 80;
+                    // Strict check: AVERAGE on B2:B4
+                    const validRange = clean.includes("B2:B4");
+                    return clean.startsWith("=AVERAGE(") && validRange && val === 80;
                 },
                 hint: "Use =AVERAGE(start:end) on the fuel data."
             },
@@ -516,7 +524,7 @@
                 sheetName: "REACTOR_CORE.xlsx",
                 desc: `
                     <p>Warning: One sector is dropping to dangerous temperatures. We need to find the <strong>lowest</strong> temp reading to direct heat.</p>
-                    <p class="mt-3 text-yellow-300 font-bold">Task: Identify the minimum temperature in the sector readings.</p>
+                    <p class="mt-3 text-yellow-300 font-bold">Task: Find the minimum temperature reading to locate the cooling leak.</p>
                 `,
                 setup: {
                     "A1": "SECTOR", "B1": "TEMP (K)", "C1": "TREND",
@@ -528,7 +536,9 @@
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
-                    return clean.startsWith("=MIN(") && val === 150;
+                    // Strict check: MIN on B2:B6
+                    const validRange = clean.includes("B2:B6");
+                    return clean.startsWith("=MIN(") && validRange && val === 150;
                 },
                 hint: "Use =MIN(range) to find the smallest number."
             },
@@ -538,7 +548,7 @@
                 sheetName: "POWER_GRID.xlsx",
                 desc: `
                     <p>To initiate the jump, the Hyperdrive needs the <strong>combined product</strong> of the Main, Aux, and Boost power couplings.</p>
-                    <p class="mt-3 text-yellow-300 font-bold">Task: Determine the total power factor by multiplying the three coupling outputs.</p>
+                    <p class="mt-3 text-yellow-300 font-bold">Task: Determine the total amplified power output by multiplying the three power coupling values.</p>
                 `,
                 setup: {
                     "A1": "PART", "B1": "STATUS", "C1": "POWER", "D1": "FREQ",
@@ -548,7 +558,10 @@
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
-                    return (clean.startsWith("=PRODUCT(") || clean.includes("*")) && val === 100;
+                    // Strict check: C2, C3, C4 or C2:C4
+                    const hasCells = clean.includes("C2") && clean.includes("C3") && clean.includes("C4");
+                    const hasRange = clean.includes("C2:C4");
+                    return (clean.startsWith("=PRODUCT(") || clean.includes("*")) && (hasCells || hasRange) && val === 100;
                 },
                 hint: "Use =PRODUCT(range) or multiply the cells manually."
             },
@@ -567,17 +580,19 @@
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
-                    return clean.startsWith("=SUM(") && val === 500;
+                    // Strict check: Horizontal Range B2:D2
+                    const validRange = clean.includes("B2:D2");
+                    return clean.startsWith("=SUM(") && validRange && val === 500;
                 },
                 hint: "Ranges can be sideways! Use =SUM(start:end)"
             },
-            // Level 9: Division (Efficiency Ratio) - REWORDED
+            // Level 9: Division (Efficiency Ratio) - REVISED FOR CLARITY
             {
                 title: "Efficiency Ratio",
                 sheetName: "ENGINEERING.xlsx",
                 desc: `
-                    <p>Engineering requires a diagnostic on Solar Panel <strong>X-1</strong>. To check if it is failing, we need its <strong>Efficiency Ratio</strong> (Output vs Input).</p>
-                    <p class="mt-3 text-yellow-300 font-bold">Task: Calculate the efficiency rating for Panel X-1.</p>
+                    <p>Engineering requires a diagnostic on Solar Panel <strong>X-1</strong>. System efficiency is defined as the amount of <strong>Output</strong> generated <strong>per unit of Input</strong>.</p>
+                    <p class="mt-3 text-yellow-300 font-bold">Task: Calculate the efficiency ratio for Panel X-1.</p>
                 `,
                 setup: {
                     "A1": "PANEL", "B1": "OUT", "C1": "IN", "D1": "HEALTH",
@@ -586,7 +601,9 @@
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
-                    return (clean.includes("B2/C2") || clean.includes("QUOTIENT")) && val === 0.8;
+                    // Strict Check: B2/C2
+                    const validCells = clean.includes("B2") && clean.includes("C2");
+                    return (clean.includes("B2/C2") || clean.includes("QUOTIENT")) && validCells && val === 0.8;
                 },
                 hint: "Divide Output by Input using the / symbol."
             },
@@ -596,7 +613,7 @@
                 sheetName: "SHIELD_ARRAY.xlsx",
                 desc: `
                     <p><strong>CRITICAL ALERT:</strong> The Shield Array is fluctuating! We need to balance the grid using the <strong>Average</strong> energy level of all active emitters.</p>
-                    <p class="mt-3 text-yellow-300 font-bold">Task: Calculate the average energy of the emitter block (Alpha, Beta, and Gamma).</p>
+                    <p class="mt-3 text-yellow-300 font-bold">Task: Calculate the average stability for the entire block of emitters.</p>
                 `,
                 setup: {
                     "A1": "ZONE", "B1": "L", "C1": "R", "D1": "MOD",
@@ -606,7 +623,9 @@
                 },
                 validate: (formula, val) => {
                     const clean = formula.replace(/\s/g, '').toUpperCase();
-                    return clean.startsWith("=AVERAGE(") && val === 85;
+                    // Strict check: 2D Range B2:C4
+                    const validRange = clean.includes("B2:C4");
+                    return clean.startsWith("=AVERAGE(") && validRange && val === 85;
                 },
                 hint: "Select the whole block like a box: =AVERAGE(TopLeft:BottomRight)"
             }
@@ -829,7 +848,11 @@
                 score = 9999;
                 document.getElementById('score-display').textContent = score;
                 celebrate();
-                playSuccess();
+                // Audio handled by nextLevel logic, but we need to fast track
+                // Trigger audio instantly for win
+                const endAudio = document.getElementById('end-sfx');
+                if(endAudio) { endAudio.currentTime = 0; endAudio.play().catch(e => console.warn(e)); }
+                
                 setTimeout(() => {
                     currentLevel = levels.length; 
                     nextLevel();
@@ -961,7 +984,7 @@
                  loadLevel(currentLevel + 1);
              } else {
                  // END GAME SEQUENCE
-                 // 1. TRIGGER AUDIO IMMEDIATELY BEFORE ANIMATION
+                 // 1. TRIGGER AUDIO IMMEDIATELY - FIRST ACTION
                  const endAudio = document.getElementById('end-sfx');
                  if(endAudio) {
                      endAudio.currentTime = 0;
